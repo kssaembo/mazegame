@@ -1,11 +1,10 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { sites } from '@openai/sites-vite-plugin';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), sites()],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': import.meta.dirname,
