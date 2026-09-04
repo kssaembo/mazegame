@@ -1,0 +1,6 @@
+{
+  "name": "기억의 미로",
+  "description": "숨겨진 벽을 기억하고 이동·회전 명령을 조립하는 교실용 1:1 알고리즘 대전 게임",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

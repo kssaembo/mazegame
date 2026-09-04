@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { createMatch, edgeKey, executeProgram, generateMaze, shortestPath, turn, validateMaze, validateProgram } from './game';
+import type { Command } from './types';
+const commands = (...types: Command['type'][]): Command[] => types.map((type, i) => ({ id: `c${i}`, type }));
+test('회전은 방향을 정확히 90도 바꾼다', () => { assert.equal(turn('north', 'right'), 'east'); assert.equal(turn('north', 'left'), 'west'); });
+test('일반 턴 3칸, 더블찬스 6칸만 허용한다', () => { assert.equal(validateProgram(commands('forward', 'forward', 'forward'), false).valid, true); assert.equal(validateProgram(commands('forward', 'forward'), false).valid, false); assert.equal(validateProgram(commands('forward','forward','forward','forward','forward','forward'), true).valid, true); });
+test('미로는 32개 양방향 벽과 공정한 최단거리를 갖는다', () => { const walls = generateMaze('CLASS-204'); const result = validateMaze(walls); assert.equal(walls.length, 32); assert.equal(new Set(walls.map(w => edgeKey(w.a, w.b))).size, 32); assert.equal(result.valid, true); assert.equal(result.distanceA, result.distanceB); assert.ok(Number.isFinite(shortestPath(walls, {row:0,col:0}, {row:6,col:6}))); });
+test('동일 시드는 동일 미로를 만든다', () => assert.deepEqual(generateMaze('same-seed'), generateMaze('same-seed')));
+test('경계 충돌은 즉시 출발점 복귀와 턴 교대를 만든다', () => { const state = createMatch(['민준','서연'], 'boundary-seed'); const current = state.players.find(p => p.id === state.currentPlayerId)!; current.direction = 'north'; const next = executeProgram(state, current.id, commands('forward','forward','forward'), false, 'once', 1000); assert.deepEqual(next.players.find(p => p.id === current.id)!.position, current.start); assert.equal(next.logs[0].collisionKind, 'boundary'); assert.notEqual(next.currentPlayerId, current.id); });
+test('같은 actionId는 한 번만 처리한다', () => { const state = createMatch(['A','B'], 'dedupe'); const current = state.currentPlayerId; const once = executeProgram(state, current, commands('turnRight','forward','turnLeft','forward','forward'), false, 'same'); assert.strictEqual(executeProgram(once, once.currentPlayerId, commands('forward','forward','forward'), false, 'same'), once); });
